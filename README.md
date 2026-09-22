@@ -2,10 +2,10 @@
 
 > High-performance, sub-second, pixel-perfect HTML-to-PDF rendering for PHP applications powered by direct headless Chromium IPC pipes — **zero Node.js, NPM, or Puppeteer required. Zero framework lock-in.**
 
-[![Tests](https://github.com/zentiq-labs/fast-pdf/actions/workflows/tests.yml/badge.svg)](https://github.com/zentiq-labs/fast-pdf/actions/workflows/tests.yml)
-[![Latest Stable Version](https://poser.pugx.org/zentiq-labs/fast-pdf/v/stable)](https://packagist.org/packages/zentiq-labs/fast-pdf)
-[![License](https://poser.pugx.org/zentiq-labs/fast-pdf/license)](https://packagist.org/packages/zentiq-labs/fast-pdf)
-[![PHP Version Require](https://poser.pugx.org/zentiq-labs/fast-pdf/require/php)](https://packagist.org/packages/zentiq-labs/fast-pdf)
+[![Tests](https://github.com/zentiqlabs/fast-pdf/actions/workflows/tests.yml/badge.svg)](https://github.com/zentiqlabs/fast-pdf/actions)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
+[![Total Downloads](https://img.shields.io/packagist/dt/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
+[![License](https://img.shields.io/github/license/zentiqlabs/fast-pdf.svg?style=flat-square)](LICENSE.md)
 
 ---
 

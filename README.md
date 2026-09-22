@@ -5,7 +5,7 @@
 [![Tests](https://github.com/zentiqlabs/fast-pdf/actions/workflows/tests.yml/badge.svg)](https://github.com/zentiqlabs/fast-pdf/actions)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
 [![Total Downloads](https://img.shields.io/packagist/dt/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
-[![License](https://img.shields.io/github/license/zentiqlabs/fast-pdf.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/zentiqlabs/fast-pdf?style=flat-square&color=blue)](https://github.com/zentiqlabs/fast-pdf/blob/main/LICENSE)
 
 ---
 

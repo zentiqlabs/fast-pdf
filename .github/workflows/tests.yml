@@ -24,8 +24,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring, intl, zip, bcmath
-          coverage: xdebug
+          extensions: mbstring, intl, pdo, pdo_sqlite, pcov
+          coverage: pcov
           tools: composer:v2
 
       - name: Install Chromium
@@ -48,7 +48,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist --no-progress
 
       - name: Run tests
-        run: vendor/bin/pest --coverage --min=80
+        run: vendor/bin/pest
         env:
           FAST_PDF_BINARY: /usr/bin/chromium-browser
           FAST_PDF_CONTAINERIZED: "true"

@@ -6,7 +6,9 @@ namespace ZentiqLabs\FastPdf\Services;
 
 final class TailwindCompiler
 {
-    public function __construct(private readonly string $cdnUrl) {}
+    public function __construct(private readonly string $cdnUrl)
+    {
+    }
 
     /**
      * Inject the Tailwind standalone CDN script into the document HEAD.

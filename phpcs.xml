@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="ZentiqLabs FastPdf">
-    <description>Coding standard for zentiq-labs/laravel-fast-pdf</description>
+    <description>Coding standard for zentiq-labs/fast-pdf</description>
 
     <file>src</file>
     <file>tests</file>
@@ -21,4 +21,11 @@
 
     <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
     <rule ref="Generic.PHP.RequireStrictTypes"/>
+
+    <!-- Pest test files declare helper functions alongside test closures,
+         which PSR-1 considers a side effect. Suppress for the entire tests/
+         directory since this is an intentional Pest pattern, not a violation. -->
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>tests/*</exclude-pattern>
+    </rule>
 </ruleset>

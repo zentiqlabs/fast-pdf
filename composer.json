@@ -1,0 +1,51 @@
+{
+    "name": "zentiq-labs/fast-pdf",
+    "description": "Framework-agnostic, high-performance PHP-to-PDF rendering via direct headless Chromium IPC pipes. Works in Core PHP, Laravel, CodeIgniter 4, Symfony, and WordPress.",
+    "keywords": ["pdf", "chromium", "headless", "html-to-pdf", "pdf-generation", "php"],
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Usman Khan",
+            "email": "usman@zentiq.com",
+            "homepage": "https://zentiq.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "symfony/process": "^7.0"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.6",
+        "pestphp/pest": "^3.0",
+        "phpunit/phpunit": "^11.0",
+        "phpstan/phpstan": "^2.0",
+        "squizlabs/php_codesniffer": "^3.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "ZentiqLabs\\FastPdf\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZentiqLabs\\FastPdf\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/pest --coverage",
+        "check": "vendor/bin/phpstan analyse",
+        "cs": "vendor/bin/phpcs",
+        "cs:fix": "vendor/bin/phpcbf"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

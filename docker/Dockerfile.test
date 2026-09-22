@@ -1,0 +1,38 @@
+FROM php:8.3-cli-alpine
+
+LABEL maintainer="Usman Khan <usman@zentiq.com>"
+LABEL org.opencontainers.image.description="Test runner for zentiq-labs/fast-pdf"
+
+# Runtime dependencies for Chromium and PHP extensions
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ttf-freefont \
+    font-noto-emoji \
+    wqy-zenhei \
+    bash \
+    git \
+    unzip \
+    curl \
+    libzip-dev \
+    icu-dev \
+    oniguruma-dev
+
+RUN docker-php-ext-install zip intl mbstring bcmath
+
+# Required by Chromium in unprivileged containers
+ENV FAST_PDF_BINARY="/usr/bin/chromium-browser"
+ENV FAST_PDF_CONTAINERIZED="true"
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+COPY composer.json ./
+RUN composer install --no-scripts --no-progress --prefer-dist --no-interaction
+
+COPY . .
+
+CMD ["vendor/bin/pest", "--colors=always"]

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="ZentiqLabs FastPdf">
+    <description>Coding standard for zentiq-labs/laravel-fast-pdf</description>
+
+    <file>src</file>
+    <file>tests</file>
+
+    <arg name="basepath" value="."/>
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <arg name="extensions" value="php"/>
+
+    <rule ref="PSR12"/>
+
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+        </properties>
+    </rule>
+
+    <rule ref="Squiz.WhiteSpace.SuperfluousWhitespace"/>
+    <rule ref="Generic.PHP.RequireStrictTypes"/>
+</ruleset>

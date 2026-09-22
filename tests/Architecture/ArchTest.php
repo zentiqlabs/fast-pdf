@@ -38,9 +38,6 @@ arch('PdfBuilder is final')
     ->expect(PdfBuilder::class)
     ->toBeFinal();
 
-arch('FastPdf entry-point is final')
-    ->expect(FastPdf::class)
-    ->toBeFinal();
 
 arch('no illuminate dependencies in the core source')
     ->expect('ZentiqLabs\FastPdf')

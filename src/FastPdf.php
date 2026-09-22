@@ -36,7 +36,7 @@ use ZentiqLabs\FastPdf\Services\TailwindCompiler;
  *     the sandbox-bypass flags required by unprivileged Linux containers.
  *     Never set this on bare-metal or VM deployments.
  */
-final class FastPdf
+class FastPdf
 {
     private readonly ProcessOrchestrator $orchestrator;
     private readonly TailwindCompiler $tailwindCompiler;

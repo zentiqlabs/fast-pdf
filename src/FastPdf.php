@@ -89,7 +89,7 @@ class FastPdf
     public static function fake(array $config = []): static
     {
         $engine   = new FakePdfEngine();
-        $instance = new static($config, $engine);
+        $instance = new self($config, $engine);
         $instance->fake = $engine;
 
         return $instance;

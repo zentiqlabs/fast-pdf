@@ -21,7 +21,8 @@ final class PdfResponse
     public function __construct(
         public readonly string $body,
         public readonly array $headers,
-    ) {}
+    ) {
+    }
 
     /**
      * Emit all headers and the PDF body via the PHP SAPI.

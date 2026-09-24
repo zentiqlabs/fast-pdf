@@ -86,7 +86,7 @@ class FastPdf
      *
      * @param array<string, mixed> $config
      */
-    public static function fake(array $config = []): static
+    public static function fake(array $config = []): self
     {
         $engine   = new FakePdfEngine();
         $instance = new self($config, $engine);

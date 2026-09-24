@@ -176,3 +176,90 @@ it('TailwindCompiler can be instantiated standalone', function (): void {
 
     expect($html)->toContain('cdn.tailwindcss.com');
 });
+
+// ------------------------------------------------------------------
+// FastPdf::fake()
+// ------------------------------------------------------------------
+
+it('FastPdf::fake() returns a FastPdf instance', function (): void {
+    expect(FastPdf::fake())->toBeInstanceOf(FastPdf::class);
+});
+
+it('FastPdf::fake() bypasses Chromium and returns fake PDF bytes', function (): void {
+    $pdf    = FastPdf::fake();
+    $result = $pdf->fromHtml('<p>Hello</p>')->output();
+
+    expect($result)->toBeString()->not->toBeEmpty();
+});
+
+it('FastPdf::fake() records render calls', function (): void {
+    $pdf = FastPdf::fake();
+    $pdf->fromHtml('<p>First</p>')->output();
+    $pdf->fromHtml('<p>Second</p>')->output();
+
+    expect($pdf->renderedCalls())->toHaveCount(2);
+});
+
+it('assertRendered() passes after a render call', function (): void {
+    $pdf = FastPdf::fake();
+    $pdf->fromHtml('<h1>Test</h1>')->output();
+
+    expect(fn () => $pdf->assertRendered())->not->toThrow(\RuntimeException::class);
+});
+
+it('assertRendered() throws when no render occurred', function (): void {
+    $pdf = FastPdf::fake();
+
+    expect(fn () => $pdf->assertRendered())->toThrow(\RuntimeException::class);
+});
+
+it('assertRenderedCount() matches the number of renders', function (): void {
+    $pdf = FastPdf::fake();
+    $pdf->fromHtml('<p>A</p>')->output();
+    $pdf->fromHtml('<p>B</p>')->output();
+
+    expect(fn () => $pdf->assertRenderedCount(2))->not->toThrow(\RuntimeException::class);
+    expect(fn () => $pdf->assertRenderedCount(1))->toThrow(\RuntimeException::class);
+});
+
+it('assertRenderedHtmlContains() matches an HTML fragment', function (): void {
+    $pdf = FastPdf::fake();
+    $pdf->fromHtml('<h1>Invoice #42</h1>')->output();
+
+    expect(fn () => $pdf->assertRenderedHtmlContains('Invoice #42'))->not->toThrow(\RuntimeException::class);
+    expect(fn () => $pdf->assertRenderedHtmlContains('Nonexistent'))->toThrow(\RuntimeException::class);
+});
+
+it('assertRendered() throws LogicException when not in fake mode', function (): void {
+    // A real instance (without fake()) should throw LogicException on assertions.
+    $pdf = new class extends FastPdf {
+        public function __construct()
+        {
+            // skip real constructor
+        }
+
+        public function builder(): PdfBuilder
+        {
+            return new PdfBuilder(
+                orchestrator:     \Mockery::mock(\ZentiqLabs\FastPdf\Services\ProcessOrchestrator::class),
+                tailwindCompiler: new TailwindCompiler('https://cdn.tailwindcss.com'),
+                defaultConfig:    [],
+            );
+        }
+    };
+
+    expect(fn () => $pdf->assertRendered())->toThrow(\LogicException::class);
+});
+
+it('FastPdf::fake() fromFile() also records the render call', function (): void {
+    $template = tempnam(sys_get_temp_dir(), 'fpdf_') . '.php';
+    file_put_contents($template, '<p><?= $name ?></p>');
+
+    $pdf = FastPdf::fake();
+    $pdf->fromFile($template, ['name' => 'Zentiq'])->output();
+
+    $pdf->assertRendered();
+    $pdf->assertRenderedHtmlContains('Zentiq');
+
+    unlink($template);
+});

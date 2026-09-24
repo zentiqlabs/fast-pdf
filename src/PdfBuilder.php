@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace ZentiqLabs\FastPdf;
 
+use ZentiqLabs\FastPdf\Contracts\PdfEngineInterface;
 use ZentiqLabs\FastPdf\Enums\PaperOrientation;
+use ZentiqLabs\FastPdf\PdfResponse;
 use ZentiqLabs\FastPdf\Enums\PaperSize;
 use ZentiqLabs\FastPdf\Exceptions\PdfGenerationFailedException;
 use ZentiqLabs\FastPdf\Exceptions\TemplateNotFoundException;
-use ZentiqLabs\FastPdf\Services\ProcessOrchestrator;
 use ZentiqLabs\FastPdf\Services\TailwindCompiler;
 
 final class PdfBuilder
@@ -28,7 +29,7 @@ final class PdfBuilder
 
     /** @param array<string, mixed> $defaultConfig */
     public function __construct(
-        private readonly ProcessOrchestrator $orchestrator,
+        private readonly PdfEngineInterface $orchestrator,
         private readonly TailwindCompiler $tailwindCompiler,
         array $defaultConfig = [],
     ) {
@@ -152,6 +153,43 @@ final class PdfBuilder
     }
 
     /**
+     * Convenience method to set paper format and orientation in one call.
+     *
+     * Supported formats: 'a0'–'a6', 'letter', 'legal', 'tabloid', 'ledger'.
+     * Supported orientations: 'portrait' (default), 'landscape'.
+     */
+    public function paper(string $format = 'a4', string $orientation = 'portrait'): static
+    {
+        $this->paperSize($format);
+
+        if ($orientation === 'landscape') {
+            $this->landscape();
+        } else {
+            $this->portrait();
+        }
+
+        return $this;
+    }
+
+    /**
+     * Render and return a PdfResponse ready for inline browser display.
+     * Does not emit headers or call exit — the caller controls the response lifecycle.
+     */
+    public function toInlineResponse(?string $filename = null): PdfResponse
+    {
+        return $this->buildResponse('inline', $filename ?? 'document.pdf');
+    }
+
+    /**
+     * Render and return a PdfResponse that triggers a browser file download.
+     * Does not emit headers or call exit — the caller controls the response lifecycle.
+     */
+    public function toDownloadResponse(?string $filename = null): PdfResponse
+    {
+        return $this->buildResponse('attachment', $filename ?? 'document.pdf');
+    }
+
+    /**
      * Render and return the raw binary PDF string.
      */
     public function output(): string
@@ -269,6 +307,23 @@ final class PdfBuilder
         };
 
         return $render($filePath, $data);
+    }
+
+    private function buildResponse(string $disposition, string $filename): PdfResponse
+    {
+        $pdf  = $this->output();
+        $safe = rawurlencode(basename($filename));
+
+        return new PdfResponse(
+            body: $pdf,
+            headers: [
+                'Content-Type'        => 'application/pdf',
+                'Content-Disposition' => "{$disposition}; filename=\"{$safe}\"; filename*=UTF-8''{$safe}",
+                'Content-Length'      => (string) strlen($pdf),
+                'Cache-Control'       => 'private, max-age=0, must-revalidate',
+                'Pragma'              => 'public',
+            ],
+        );
     }
 
     private function sendHeaders(string $disposition, string $filename): void

@@ -137,6 +137,7 @@ All methods return `$this` and can be chained in any order.
 |---|---|
 | `fromHtml(string $html)` | Set a raw HTML string as the source |
 | `fromFile(string $path, array $data = [])` | Render a PHP template file as the source |
+| `paper(string $format = 'a4', string $orientation = 'portrait')` | Set paper format and orientation in one call |
 | `paperSize(PaperSize\|string $size)` | Set paper size (see enum values) |
 | `landscape()` | Landscape orientation |
 | `portrait()` | Portrait orientation |
@@ -145,6 +146,8 @@ All methods return `$this` and can be chained in any order.
 | `emulateMedia(string $media = 'print')` | CSS media type: `'print'` or `'screen'` |
 | `output(): string` | Render and return raw binary PDF bytes |
 | `save(string $path)` | Render and write to a file path |
+| `toInlineResponse(?string $filename = null): PdfResponse` | Return a `PdfResponse` for inline browser display (no `exit`) |
+| `toDownloadResponse(?string $filename = null): PdfResponse` | Return a `PdfResponse` for file download (no `exit`) |
 | `download(string $filename = 'document.pdf')` | Emit download headers, stream, and `exit` |
 | `stream(string $filename = 'document.pdf')` | Emit inline headers, stream, and `exit` |
 
@@ -321,6 +324,83 @@ function zentiq_pdf(): FastPdf
 }
 ```
 
+
+## Paper Setup
+
+The `paper()` method is a convenience shorthand for setting both the paper format and orientation in one call.
+
+```php
+$pdf->fromHtml($html)->paper('a4', 'portrait')->output();
+$pdf->fromHtml($html)->paper('letter', 'landscape')->save('/tmp/report.pdf');
+```
+
+Supported formats: `a0` `a1` `a2` `a3` `a4` `a5` `a6` `letter` `legal` `tabloid` `ledger`.
+
+The individual `paperSize()`, `landscape()`, and `portrait()` methods remain available for finer-grained control.
+
+## Response Helpers
+
+`toInlineResponse()` and `toDownloadResponse()` render the PDF and return a `PdfResponse` value object instead of calling `exit`. This fits naturally into any framework that manages its own response lifecycle.
+
+```php
+// Framework-agnostic — inspect headers and body yourself
+$response = $pdf->fromHtml($html)->toInlineResponse('report.pdf');
+
+foreach ($response->headers as $name => $value) {
+    header("{$name}: {$value}");
+}
+echo $response->body;
+
+// Or let PdfResponse emit directly
+$pdf->fromHtml($html)->toDownloadResponse('invoice.pdf')->send();
+```
+
+`PdfResponse` exposes:
+- `$response->body` — raw binary PDF bytes
+- `$response->headers` — associative array of HTTP header name → value
+- `$response->send()` — emit headers + body via the PHP SAPI
+
+For Symfony or any PSR-7 framework:
+```php
+$r = $pdf->fromHtml($html)->toDownloadResponse('invoice.pdf');
+
+return new Response($r->body, 200, $r->headers);  // Symfony
+return new \Laminas\Diactoros\Response($r->body, 200, $r->headers);  // PSR-7
+```
+
+## Testing with FastPdf::fake()
+
+Call `FastPdf::fake()` to get an instance that records every render call without spawning Chromium.
+
+```php
+$pdf = FastPdf::fake();
+
+$pdf->fromHtml('<h1>Invoice #42</h1>')->output();
+$pdf->fromView('invoices.pdf', ['id' => 42])->save('/tmp/out.pdf'); // hypothetical
+
+// Assert at least one render occurred
+$pdf->assertRendered();
+
+// Assert an exact number of renders
+$pdf->assertRenderedCount(1);
+
+// Assert a specific HTML fragment was rendered
+$pdf->assertRenderedHtmlContains('Invoice #42');
+
+// Inspect all recorded calls
+$calls = $pdf->renderedCalls(); // array of ['html' => ..., 'options' => ...]
+```
+
+The fake returns `%PDF-1.4 fake` bytes by default. This is intentional — unit tests should not depend on real PDF content. To override the fake output, reach into the engine:
+
+```php
+// Not needed in most tests, but available if you must assert on the bytes
+use ZentiqLabs\FastPdf\Testing\FakePdfEngine;
+
+$engine = new FakePdfEngine();
+$engine->returns('%PDF-1.5 custom');
+$pdf = new FastPdf([], $engine);
+```
 
 ## Docker & Alpine Linux
 

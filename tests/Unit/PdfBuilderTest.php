@@ -199,3 +199,85 @@ it('converts cm margins to inch fractions', function (): void {
 
     makeBuilder($o)->fromHtml('<p>x</p>')->margins(2.54, 2.54, 2.54, 2.54, 'cm')->output();
 });
+
+// ------------------------------------------------------------------
+// paper() convenience method
+// ------------------------------------------------------------------
+
+it('paper() sets paper size and portrait orientation', function (): void {
+    $o = Mockery::mock(ProcessOrchestrator::class);
+    $o->shouldReceive('render')
+        ->once()
+        ->withArgs(function (string $_, array $opts): bool {
+            return $opts['dimensions'] === PaperSize::Letter->dimensions()
+                && $opts['landscape'] === false;
+        })
+        ->andReturn('%PDF-1.4');
+
+    makeBuilder($o)->fromHtml('<p>x</p>')->paper('letter', 'portrait')->output();
+});
+
+it('paper() sets paper size and landscape orientation', function (): void {
+    $o = Mockery::mock(ProcessOrchestrator::class);
+    $o->shouldReceive('render')
+        ->once()
+        ->withArgs(function (string $_, array $opts): bool {
+            return $opts['dimensions'] === PaperSize::A3->dimensions()
+                && $opts['landscape'] === true;
+        })
+        ->andReturn('%PDF-1.4');
+
+    makeBuilder($o)->fromHtml('<p>x</p>')->paper('a3', 'landscape')->output();
+});
+
+it('paper() defaults to a4 portrait when called with no arguments', function (): void {
+    $o = Mockery::mock(ProcessOrchestrator::class);
+    $o->shouldReceive('render')
+        ->once()
+        ->withArgs(function (string $_, array $opts): bool {
+            return $opts['dimensions'] === PaperSize::A4->dimensions()
+                && $opts['landscape'] === false;
+        })
+        ->andReturn('%PDF-1.4');
+
+    makeBuilder($o)->fromHtml('<p>x</p>')->paper()->output();
+});
+
+// ------------------------------------------------------------------
+// toInlineResponse() / toDownloadResponse()
+// ------------------------------------------------------------------
+
+it('toInlineResponse() returns a PdfResponse with inline disposition', function (): void {
+    $response = makeBuilder()->fromHtml('<p>x</p>')->toInlineResponse('report.pdf');
+
+    expect($response)->toBeInstanceOf(\ZentiqLabs\FastPdf\PdfResponse::class)
+        ->and($response->headers['Content-Type'])->toBe('application/pdf')
+        ->and($response->headers['Content-Disposition'])->toContain('inline')
+        ->and($response->headers['Content-Disposition'])->toContain('report.pdf')
+        ->and($response->body)->not->toBeEmpty();
+});
+
+it('toDownloadResponse() returns a PdfResponse with attachment disposition', function (): void {
+    $response = makeBuilder()->fromHtml('<p>x</p>')->toDownloadResponse('invoice.pdf');
+
+    expect($response)->toBeInstanceOf(\ZentiqLabs\FastPdf\PdfResponse::class)
+        ->and($response->headers['Content-Disposition'])->toContain('attachment')
+        ->and($response->headers['Content-Disposition'])->toContain('invoice.pdf');
+});
+
+it('toInlineResponse() defaults filename to document.pdf', function (): void {
+    $response = makeBuilder()->fromHtml('<p>x</p>')->toInlineResponse();
+
+    expect($response->headers['Content-Disposition'])->toContain('document.pdf');
+});
+
+it('toDownloadResponse() Content-Length matches body byte length', function (): void {
+    $fakeBytes = str_repeat('x', 512);
+    $o = Mockery::mock(ProcessOrchestrator::class);
+    $o->shouldReceive('render')->once()->andReturn($fakeBytes);
+
+    $response = makeBuilder($o)->fromHtml('<p>x</p>')->toDownloadResponse();
+
+    expect($response->headers['Content-Length'])->toBe('512')
+        ->and(strlen($response->body))->toBe(512);
+});

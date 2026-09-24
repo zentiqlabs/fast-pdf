@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace ZentiqLabs\FastPdf;
 
+use ZentiqLabs\FastPdf\Contracts\PdfEngineInterface;
 use ZentiqLabs\FastPdf\Services\ProcessOrchestrator;
 use ZentiqLabs\FastPdf\Services\TailwindCompiler;
+use ZentiqLabs\FastPdf\Testing\FakePdfEngine;
 
 /**
  * Main entry point for zentiq-labs/fast-pdf.
@@ -38,19 +40,25 @@ use ZentiqLabs\FastPdf\Services\TailwindCompiler;
  */
 class FastPdf
 {
-    private readonly ProcessOrchestrator $orchestrator;
+    private readonly PdfEngineInterface $orchestrator;
     private readonly TailwindCompiler $tailwindCompiler;
 
     /** @var array<string, mixed> */
     private readonly array $config;
 
-    /** @param array<string, mixed> $config */
-    public function __construct(array $config = [])
+    private ?FakePdfEngine $fake = null;
+
+    /**
+     * @param array<string, mixed>  $config
+     * @param PdfEngineInterface|null $engine Supply a custom engine (e.g. FakePdfEngine for tests).
+     *                                        When null the real ProcessOrchestrator is constructed.
+     */
+    public function __construct(array $config = [], ?PdfEngineInterface $engine = null)
     {
         $defaults     = $this->defaults();
         $this->config = array_replace_recursive($defaults, $config);
 
-        $this->orchestrator = new ProcessOrchestrator(
+        $this->orchestrator = $engine ?? new ProcessOrchestrator(
             discoveryPaths:     (array) $this->config['binary_discovery_paths'],
             extraFlags:         $this->resolveContainerFlags(),
             timeout:            (int)   $this->config['timeout'],
@@ -62,6 +70,54 @@ class FastPdf
         $this->tailwindCompiler = new TailwindCompiler(
             cdnUrl: (string) $this->config['tailwind_cdn_url'],
         );
+    }
+
+    /**
+     * Return a FastPdf instance backed by FakePdfEngine.
+     *
+     * Chromium is never spawned. Every render call is recorded and can be
+     * verified with the assertion helpers on the returned instance.
+     *
+     *   $pdf = FastPdf::fake();
+     *   $pdf->fromHtml('<h1>Test</h1>')->output();
+     *   $pdf->assertRendered();
+     *   $pdf->assertRenderedCount(1);
+     *   $pdf->assertRenderedHtmlContains('<h1>');
+     *
+     * @param array<string, mixed> $config
+     */
+    public static function fake(array $config = []): static
+    {
+        $engine   = new FakePdfEngine();
+        $instance = new static($config, $engine);
+        $instance->fake = $engine;
+
+        return $instance;
+    }
+
+    // ------------------------------------------------------------------
+    // Fake assertion helpers (only usable after fake())
+    // ------------------------------------------------------------------
+
+    public function assertRendered(): void
+    {
+        $this->requireFakeMode()->assertRendered();
+    }
+
+    public function assertRenderedCount(int $expected): void
+    {
+        $this->requireFakeMode()->assertRenderedCount($expected);
+    }
+
+    public function assertRenderedHtmlContains(string $fragment): void
+    {
+        $this->requireFakeMode()->assertRenderedHtmlContains($fragment);
+    }
+
+    /** @return array<int, array{html: string, options: array<string, mixed>}> */
+    public function renderedCalls(): array
+    {
+        return $this->requireFakeMode()->calls();
     }
 
     /**
@@ -97,6 +153,17 @@ class FastPdf
     // ------------------------------------------------------------------
     // Private helpers
     // ------------------------------------------------------------------
+
+    private function requireFakeMode(): FakePdfEngine
+    {
+        if ($this->fake === null) {
+            throw new \LogicException(
+                'Assertion helpers are only available on a FastPdf instance created via FastPdf::fake().',
+            );
+        }
+
+        return $this->fake;
+    }
 
     /**
      * Return sandbox-bypass flags only when running in a containerized

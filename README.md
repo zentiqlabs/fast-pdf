@@ -1,13 +1,14 @@
-# Fast PDF
+﻿# Fast PDF
 
-> High-performance, sub-second, pixel-perfect HTML-to-PDF rendering for PHP applications powered by direct headless Chromium IPC pipes — **zero Node.js, NPM, or Puppeteer required. Zero framework lock-in.**
+> High-performance, sub-second, pixel-perfect HTML-to-PDF rendering for PHP applications powered by direct headless Chromium IPC pipes. **Zero Node.js, NPM, or Puppeteer required. Zero framework lock-in.**
+
+> **Official Package:** Maintained by [Zentiq Labs](https://github.com/zentiqlabs).  
+> For security disclosures and support, visit [zentiqlabs.com](https://zentiqlabs.com).
 
 [![Tests](https://github.com/zentiqlabs/fast-pdf/actions/workflows/tests.yml/badge.svg)](https://github.com/zentiqlabs/fast-pdf/actions)
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
 [![Total Downloads](https://img.shields.io/packagist/dt/zentiq-labs/fast-pdf.svg?style=flat-square)](https://packagist.org/packages/zentiq-labs/fast-pdf)
-[![License](https://img.shields.io/github/license/zentiqlabs/fast-pdf?style=flat-square&color=blue)](https://github.com/zentiqlabs/fast-pdf/blob/main/LICENSE)
-
----
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/zentiqlabs/fast-pdf/blob/main/LICENSE)
 
 ## Table of Contents
 
@@ -33,7 +34,6 @@
 - [Contributing](#contributing)
 - [License](#license)
 
----
 
 ## Why Fast PDF?
 
@@ -48,7 +48,6 @@ Most PHP PDF solutions fall into one of two traps: they ship a bundled renderer 
 | wkhtmltopdf | Partial (WebKit 2014) | No | No |
 | **Fast PDF** | **Full (Blink engine)** | **No** | **No** |
 
----
 
 ## Requirements
 
@@ -63,7 +62,6 @@ Most PHP PDF solutions fall into one of two traps: they ship a bundled renderer 
 > - **Debian / Ubuntu**: `apt-get install chromium-browser`
 > - **macOS (Homebrew)**: `brew install --cask chromium`
 
----
 
 ## Installation
 
@@ -71,7 +69,6 @@ Most PHP PDF solutions fall into one of two traps: they ship a bundled renderer 
 composer require zentiq-labs/fast-pdf
 ```
 
----
 
 ## Quick Start
 
@@ -90,7 +87,6 @@ $pdf->fromFile(__DIR__ . '/templates/invoice.php', ['invoice' => $invoice])
     ->download('invoice.pdf');   // streams + exits
 ```
 
----
 
 ## Configuration
 
@@ -132,7 +128,6 @@ $pdf = new FastPdf(require __DIR__ . '/config/fast-pdf.php');
 | `FAST_PDF_TAILWIND_CDN` | `https://cdn.tailwindcss.com` | Tailwind standalone CDN URL |
 | `FAST_PDF_TEMP_DIR` | `sys_get_temp_dir()` | Scratch directory |
 
----
 
 ## Fluent Builder API
 
@@ -153,7 +148,6 @@ All methods return `$this` and can be chained in any order.
 | `download(string $filename = 'document.pdf')` | Emit download headers, stream, and `exit` |
 | `stream(string $filename = 'document.pdf')` | Emit inline headers, stream, and `exit` |
 
----
 
 ## PHP Template Files
 
@@ -177,7 +171,6 @@ $pdf->fromFile(__DIR__ . '/templates/invoice.php', [
 ])->save('/var/invoices/INV-001.pdf');
 ```
 
----
 
 ## Tailwind CSS Support
 
@@ -192,7 +185,6 @@ $pdf->fromHtml($html)
 
 > For offline environments or strict CSP policies, override `tailwind_cdn_url` to a self-hosted build of the Tailwind standalone CLI output.
 
----
 
 ## Output Methods
 
@@ -223,7 +215,6 @@ $pdf->fromFile('/templates/receipt.php', $data)->download('receipt-001.pdf');
 $pdf->fromFile('/templates/receipt.php', $data)->stream('receipt-001.pdf');
 ```
 
----
 
 ## Paper Sizes & Orientation
 
@@ -238,7 +229,6 @@ $pdf->fromHtml($html)->paperSize(PaperSize::Letter)->output();
 $pdf->fromHtml($html)->paperSize('legal')->landscape()->output();
 ```
 
----
 
 ## Framework Integration
 
@@ -331,7 +321,6 @@ function zentiq_pdf(): FastPdf
 }
 ```
 
----
 
 ## Docker & Alpine Linux
 
@@ -352,7 +341,6 @@ ENV FAST_PDF_BINARY=/usr/bin/chromium-browser
 
 Always include `--no-sandbox` and `--disable-setuid-sandbox` in `chromium_flags` (the package defaults already include them) when running inside unprivileged Docker containers.
 
----
 
 ## Manual Test Script
 
@@ -366,7 +354,6 @@ php bin/test-render.php
 php bin/test-render.php /usr/bin/chromium-browser
 ```
 
----
 
 ## Testing
 
@@ -392,7 +379,6 @@ Code style (PSR-12):
 composer cs
 ```
 
----
 
 ## Contributing
 
@@ -403,12 +389,10 @@ Contributions, issues, and feature requests are welcome. Please ensure any pull 
 3. Passes the full CI pipeline (`test`, `check`, `cs`) locally before opening a PR.
 4. Follows [Conventional Commits](https://www.conventionalcommits.org/).
 
----
 
 ## License
 
 The MIT License (MIT). See [LICENSE](LICENSE) for details.
 
----
 
-*Developed and maintained by [Usman Khan](https://github.com/usman-khan) at [Zentiq Labs](https://zentiq.com).*
+Developed and maintained by [Usman Khan](https://github.com/usmankhan-io) at [Zentiq Labs](https://zentiqlabs.com).
